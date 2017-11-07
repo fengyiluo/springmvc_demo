@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>HomePage</title>
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="bui/bui/1.1.21/css/bs3/dpl.css">
+    <link rel="stylesheet" href="bui/bui/1.1.21/css/bs3/bui.css">
+    <script type="text/javascript" src="common/js/jquery-1.8.1.min.js"></script>
+    <script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="bui/seajs/2.3.0/sea.js"></script>
+    <script type="text/javascript" src="bui/bui/1.1.21/config.js"></script>
+</head>
+
+<body>
+<h2>创建模态框（Modal）</h2>
+<!-- 按钮触发模态框 -->
+<button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">开始演示模态框</button>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">模态框（Modal）标题</h4>
+            </div>
+            <div class="modal-body">在这里添加一些文本</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary">提交更改</button>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal -->
+</div>
+
+
+<label>选择日期：</label><input type="text" class="calendar"/>
+
+
+<div>
+    <button id="btnShow" class="button button-primary">显示窗口</button>
+    <button id="messageShow" class="button button-primary">显示提示消息框</button>
+</div>
+
+<form class="form-horizontal" id="testform">
+    <div class="row">
+        <div class="control-group span8">
+            <label class="control-label">供应商编码：</label>
+            <div class="controls">
+                <input name="id" type="text" class="input-normal control-text">
+            </div>
+        </div>
+        <div class="control-group span8">
+            <label class="control-label">供应商类型：</label>
+            <div class="controls">
+                <select name="type" class="input-normal">
+                    <option value="saler">淘宝卖家</option>
+                    <option value="large">大厂直供</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="control-group span15">
+            <label class="control-label">起始日期：</label>
+            <div class="controls">
+                <input name="start" class="input-small calendar" type="text"><label>&nbsp;-&nbsp;</label><input
+                    name="end" class="input-small calendar" type="text">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="control-group span15">
+            <label class="control-label">选择范围：</label>
+            <div class="controls">
+                <label class="checkbox"><input name="range" type="checkbox" value="1">范围1</label>
+                <label class="checkbox"><input name="range" type="checkbox" value="2">范围2</label>
+                <label class="checkbox"><input name="range" type="checkbox" value="3">范围3</label>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="control-group span15">
+            <label class="control-label">备注：</label>
+            <div class="controls control-row4">
+                <textarea name="memo" class="input-large" type="text"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row form-actions actions-bar">
+        <div class="span13 offset3 ">
+            <button type="submit" class="button button-primary">保存</button>
+            <button type="reset" class="button">重置</button>
+        </div>
+    </div>
+</form>
+<div id="J_Log" class="well"></div>
+
+
+<div class="row">
+    <div class="span16">
+        <div id="grid">
+
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    BUI.use('bui/calendar', function (Calendar) {
+        var datepicker = new Calendar.DatePicker({
+            trigger: '.calendar',
+            autoRender: true
+        });
+    });
+
+
+    $('#btnShow').on('click', function () {
+        BUI.use('bui/overlay', function (Overlay) {
+            var dialog = new Overlay.Dialog({
+                title: '非模态窗口',
+                width: 500,
+                height: 300,
+                mask: false,
+                buttons: [],
+                bodyContent: '<p>这是一个非模态窗口,并且不带按钮</p>'
+            });
+            dialog.show();
+        });
+    });
+
+    $('#messageShow').on('click', function () {
+        BUI.Message.Alert('这只是简单的提示信息', function () {
+            alert('确认');
+        }, 'info');
+    });
+
+    var form = $("#testform");
+    var logEl = $('#J_Log');
+    $(form).on('submit', function (ev) {
+        ev.preventDefault();
+        //序列化成对象
+        var obj = BUI.FormHelper.serializeToObject(form);
+        //显示对象
+        logEl.text(BUI.JSON.stringify(obj));
+    });
+
+
+    BUI.use(['bui/grid', 'bui/data'], function (Grid, Data) {
+        var Grid = Grid,
+            Store = Data.Store,
+            columns = [
+                {title: '表头1', dataIndex: 'a', width: 100},
+                {id: '123', title: '表头2', dataIndex: 'b', width: 100},
+                {title: '表头3', dataIndex: 'c', width: 200}
+            ];
+
+        /**
+         * 自动发送的数据格式：
+         *  1. start: 开始记录的起始数，如第 20 条,从0开始
+         *  2. limit : 单页多少条记录
+         *  3. pageIndex : 第几页，同start参数重复，可以选择其中一个使用
+         *
+         * 返回的数据格式：
+         *  {
+         *     "rows" : [{},{}], //数据集合
+         *     "results" : 100, //记录总数
+         *     "hasError" : false, //是否存在错误
+         *     "error" : "" // 仅在 hasError : true 时使用
+         *   }
+         *
+         */
+        var store = new Store({
+                url: '',
+                autoLoad: true, //自动加载数据
+                params: { //配置初始请求的参数
+                    a: 'a1',
+                    b: 'b1'
+                },
+                pageSize: 3	// 配置分页数目
+            }),
+            grid = new Grid.Grid({
+                render: '#grid',
+                columns: columns,
+                loadMask: true, //加载数据时显示屏蔽层
+                store: store,
+                // 底部工具栏
+                bbar: {
+                    // pagingBar:表明包含分页栏
+                    pagingBar: true
+                }
+            });
+
+        grid.render();
+    });
+    $(document).ready(function () {
+        console.log("sssss");
+    })
+</script>
+
+</html>
